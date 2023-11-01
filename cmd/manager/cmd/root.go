@@ -63,7 +63,7 @@ for managing schedulers and seed peers, offering http apis and portal, etc.`,
 		}
 
 		// Initialize logger.
-		if err := logger.InitManager(cfg.Verbose, cfg.Console, d.LogDir()); err != nil {
+		if err := logger.InitManager(cfg.Verbose, cfg.Console, cfg.LogEncoding, d.LogDir()); err != nil {
 			return fmt.Errorf("init manager logger: %w", err)
 		}
 		logger.RedirectStdoutAndStderr(cfg.Console, path.Join(d.LogDir(), types.ManagerName))

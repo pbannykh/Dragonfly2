@@ -132,7 +132,7 @@ func runDfcacheSubcmd(cmdName string, args []string) error {
 	}
 
 	// Initialize logger
-	if err := logger.InitDfcache(dfcacheConfig.Console, d.LogDir()); err != nil {
+	if err := logger.InitDfcache(dfcacheConfig.Console, dfcacheConfig.LogEncoding, d.LogDir()); err != nil {
 		return fmt.Errorf("init client dfcache logger: %w", err)
 	}
 	logger.Infof("version:\n%s", version.Version())

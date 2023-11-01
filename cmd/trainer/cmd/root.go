@@ -67,7 +67,7 @@ preprocessing original record data, establing datasets and training machine lear
 		}
 
 		// Initialize logger.
-		if err := logger.InitTrainer(cfg.Verbose, cfg.Console, d.LogDir()); err != nil {
+		if err := logger.InitTrainer(cfg.Verbose, cfg.Console, cfg.LogEncoding, d.LogDir()); err != nil {
 			return fmt.Errorf("init trainer logger: %w", err)
 		}
 		logger.RedirectStdoutAndStderr(cfg.Console, path.Join(d.LogDir(), types.SchedulerName))

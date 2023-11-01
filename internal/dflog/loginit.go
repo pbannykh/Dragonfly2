@@ -17,12 +17,11 @@
 package logger
 
 import (
+	"go.uber.org/zap"
 	"io/fs"
 	"os"
 	"path"
 	"path/filepath"
-
-	"go.uber.org/zap"
 
 	"d7y.io/dragonfly/v2/pkg/types"
 )
@@ -33,9 +32,9 @@ type logInitMeta struct {
 	setLoggerFunc        func(log *zap.Logger)
 }
 
-func InitManager(verbose, console bool, dir string) error {
+func InitManager(verbose, console bool, encoding, dir string) error {
 	if console {
-		return createConsoleLogger(verbose)
+		return createConsoleLogger(verbose, encoding)
 	}
 
 	logDir := filepath.Join(dir, types.ManagerName)
@@ -62,12 +61,12 @@ func InitManager(verbose, console bool, dir string) error {
 		},
 	}
 
-	return createFileLogger(verbose, meta, logDir)
+	return createFileLogger(verbose, encoding, meta, logDir)
 }
 
-func InitScheduler(verbose, console bool, dir string) error {
+func InitScheduler(verbose, console bool, encoding, dir string) error {
 	if console {
-		return createConsoleLogger(verbose)
+		return createConsoleLogger(verbose, encoding)
 	}
 
 	logDir := filepath.Join(dir, types.SchedulerName)
@@ -90,12 +89,12 @@ func InitScheduler(verbose, console bool, dir string) error {
 		},
 	}
 
-	return createFileLogger(verbose, meta, logDir)
+	return createFileLogger(verbose, encoding, meta, logDir)
 }
 
-func InitDaemon(verbose, console bool, dir string) error {
+func InitDaemon(verbose, console bool, encoding, dir string) error {
 	if console {
-		return createConsoleLogger(verbose)
+		return createConsoleLogger(verbose, encoding)
 	}
 
 	logDir := filepath.Join(dir, types.DaemonName)
@@ -118,12 +117,12 @@ func InitDaemon(verbose, console bool, dir string) error {
 		},
 	}
 
-	return createFileLogger(verbose, meta, logDir)
+	return createFileLogger(verbose, encoding, meta, logDir)
 }
 
-func InitDfget(verbose, console bool, dir string) error {
+func InitDfget(verbose, console bool, encoding, dir string) error {
 	if console {
-		return createConsoleLogger(verbose)
+		return createConsoleLogger(verbose, encoding)
 	}
 
 	logDir := filepath.Join(dir, types.DfgetName)
@@ -138,10 +137,10 @@ func InitDfget(verbose, console bool, dir string) error {
 		},
 	}
 
-	return createFileLogger(verbose, meta, logDir)
+	return createFileLogger(verbose, encoding, meta, logDir)
 }
 
-func InitDfcache(console bool, dir string) error {
+func InitDfcache(console bool, encoding, dir string) error {
 	logDir := filepath.Join(dir, types.DfcacheName)
 	var meta = []logInitMeta{
 		{
@@ -154,12 +153,12 @@ func InitDfcache(console bool, dir string) error {
 		},
 	}
 
-	return createFileLogger(console, meta, logDir)
+	return createFileLogger(console, encoding, meta, logDir)
 }
 
-func InitTrainer(verbose, console bool, dir string) error {
+func InitTrainer(verbose, console bool, encoding, dir string) error {
 	if console {
-		return createConsoleLogger(verbose)
+		return createConsoleLogger(verbose, encoding)
 	}
 
 	logDir := filepath.Join(dir, types.TrainerName)
@@ -174,12 +173,16 @@ func InitTrainer(verbose, console bool, dir string) error {
 		},
 	}
 
-	return createFileLogger(console, meta, logDir)
+	return createFileLogger(console, encoding, meta, logDir)
 }
 
-func createConsoleLogger(verbose bool) error {
+func createConsoleLogger(verbose bool, encoding string) error {
 	levels = nil
 	config := zap.NewDevelopmentConfig()
+	if encoding == "json" {
+		config.Encoding = "json"
+		config.EncoderConfig = zap.NewProductionEncoderConfig()
+	}
 	config.Level = zap.NewAtomicLevelAt(zap.InfoLevel)
 	if verbose {
 		config.Level = zap.NewAtomicLevelAt(zap.DebugLevel)
@@ -202,13 +205,13 @@ func createConsoleLogger(verbose bool) error {
 	return nil
 }
 
-func createFileLogger(verbose bool, meta []logInitMeta, logDir string) error {
+func createFileLogger(verbose bool, encoding string, meta []logInitMeta, logDir string) error {
 	levels = nil
 	// create parent dir first
 	_ = os.MkdirAll(logDir, fs.FileMode(0700))
 
 	for _, m := range meta {
-		log, level, err := CreateLogger(path.Join(logDir, m.fileName), false, false, verbose)
+		log, level, err := CreateLogger(path.Join(logDir, m.fileName), encoding, false, false, verbose)
 		if err != nil {
 			return err
 		}

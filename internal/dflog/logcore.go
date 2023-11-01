@@ -52,7 +52,7 @@ var customCoreLevel atomic.Bool
 var grpcLevel = zap.NewAtomicLevelAt(zapcore.WarnLevel)
 var customGrpcLevel atomic.Bool
 
-func CreateLogger(filePath string, compress bool, stats bool, verbose bool) (*zap.Logger, zap.AtomicLevel, error) {
+func CreateLogger(filePath, encoding string, compress, stats, verbose bool) (*zap.Logger, zap.AtomicLevel, error) {
 	rotateConfig := &lumberjack.Logger{
 		Filename:   filePath,
 		MaxSize:    defaultRotateMaxSize,
@@ -65,6 +65,14 @@ func CreateLogger(filePath string, compress bool, stats bool, verbose bool) (*za
 
 	encoderConfig := zap.NewProductionEncoderConfig()
 	encoderConfig.EncodeTime = zapcore.TimeEncoderOfLayout(encodeTimeFormat)
+	var encoder zapcore.Encoder
+	encoder = zapcore.NewJSONEncoder(encoderConfig)
+
+	if encoding == "console" {
+		encoderConfig = zap.NewDevelopmentEncoderConfig()
+		encoder = zapcore.NewConsoleEncoder(encoderConfig)
+	}
+
 	var level = zap.NewAtomicLevel()
 	if verbose {
 		level = zap.NewAtomicLevelAt(zapcore.DebugLevel)
@@ -76,7 +84,7 @@ func CreateLogger(filePath string, compress bool, stats bool, verbose bool) (*za
 	}
 
 	core := zapcore.NewCore(
-		zapcore.NewJSONEncoder(encoderConfig),
+		encoder,
 		syncer,
 		level,
 	)

@@ -17,10 +17,11 @@
 package base
 
 type Options struct {
-	Console   bool            `yaml:"console" mapstructure:"console"`
-	Verbose   bool            `yaml:"verbose" mapstructure:"verbose"`
-	PProfPort int             `yaml:"pprof-port" mapstructure:"pprof-port"`
-	Telemetry TelemetryOption `yaml:",inline" mapstructure:",squash"`
+	Console     bool            `yaml:"console" mapstructure:"console"`
+	Verbose     bool            `yaml:"verbose" mapstructure:"verbose"`
+	LogEncoding string          `yaml:"logEncoding" mapstructure:"logEncoding"`
+	PProfPort   int             `yaml:"pprof-port" mapstructure:"pprof-port"`
+	Telemetry   TelemetryOption `yaml:",inline" mapstructure:",squash"`
 }
 
 // TelemetryOption is the option for telemetry
